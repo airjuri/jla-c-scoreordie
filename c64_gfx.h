@@ -23,4 +23,14 @@ void FillScreenColor();
 void Scroll1Left();
 void Cls();
 
+void SpriteOn(char sprite);
+void SpriteOff(char sprite);
+void SetSpriteBehindGfx(char sprite);
+void SetSpriteFrontGfx(char sprite);
+void SetSpriteColor(char sprite, char color);
+// Sets position of sprite. Sprite number maximum is 7
+// DO NOT go out of limits on that one!
+// X- and Y-coordinates are "safe"
+void SetSpriteXY(char sprite, int xPosition, char yPosition);
+
 #endif

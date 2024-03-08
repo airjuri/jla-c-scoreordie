@@ -3,6 +3,8 @@
 char _screenChar;
 char _screenCharColor;
 
+char *_spriteColor = (char *)0xd027;
+
 void Cls()
 {
     _screenChar = ' '; 
@@ -60,3 +62,44 @@ void Scroll1Left()
     __asm__("bne LineCopyLoop");
 }
 
+const char _bitLUT[] = { 1,2,4,8,16,32,64,128 };
+
+// Sprite stuff
+void SpriteOn(char sprite)
+{
+    *(char *)0xd015 |= _bitLUT[sprite];
+}
+
+void SpriteOff(char sprite)
+{
+    *(char *)0xd015 &= ~_bitLUT[sprite];
+}
+
+void SetSpriteBehindGfx(char sprite)
+{
+    *(char *)0xd01b |= _bitLUT[sprite];
+}
+
+void SetSpriteFrontGfx(char sprite)
+{
+    *(char *)0xd01b &= ~_bitLUT[sprite];
+}
+
+
+void SetSpriteColor(char sprite, char color)
+{
+    _spriteColor[sprite] = color;
+}
+
+// Sets position of sprite. Sprite number maximum is 7
+// DO NOT go out of limits on that one!
+// X- and Y-coordinates are "safe"
+void SetSpriteXY(char sprite, int xPosition, char yPosition)
+{
+    char spriteOffset = sprite << 1;
+    *(char *)(0xd000 + spriteOffset) = (char)xPosition;
+    *(char *)(0xd001 + spriteOffset) = yPosition;
+
+    if(xPosition<256) *(char *)0xd010 &= ~_bitLUT[sprite];
+    else  *(char *)0xd010 |= _bitLUT[sprite];
+}

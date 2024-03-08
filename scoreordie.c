@@ -1,9 +1,13 @@
 #include <stdio.h>
 
 #include "c64_gfx.h"
+#include "korc_c64_joystick.h"
 
 extern char _screenChar;
 extern char _screenCharColor;
+
+extern char _joy1State;
+extern char _joy2State;
 
 char _exit = 0;
 char _gameName[] = "SCORE OR DIE";
@@ -19,6 +23,24 @@ void Init()
     Cls();
 }
 
+void WaitForJoy()
+{
+    do
+    {
+        JoystickRead();
+        if(_joy2State != 0x0f) {
+            if(!(0x10 & _joy2State)) {
+                do
+                {
+                    JoystickRead();
+                } while (!(0x10 & _joy2State));
+                break;
+            }; 
+        }
+
+    }while(1);
+}
+
 void IntroScreen()
 {
     Cls();
@@ -27,6 +49,8 @@ void IntroScreen()
     printf("        HALF OF AMFF AKA AIRJURI\n\n");
     printf("                PRESENTS\n\n\n\n");
     printf("              %s", _gameName);
+
+    WaitForJoy();
 }
 
 void MainMenu()
@@ -37,7 +61,12 @@ void MainMenu()
     printf("            HINT: DO NOT DIE\n\n\n\n\n\n\n\n");
     printf("    JOYSTICK 2, PUSH BUTTON TO START\n\n");
     printf("     HIGHEST SCORE OF SESSION: %i", _hiScore);
+
+    WaitForJoy();
 }
+
+
+
 
 void GameLoop()
 {
@@ -46,7 +75,10 @@ void GameLoop()
 
 void GameOver()
 {
+    Cls();
+    printf("%c\n\n\n\n\n\n\n\n               GAME OVER", 19);
 
+    WaitForJoy();
 }
 
 int main()
