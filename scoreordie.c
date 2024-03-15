@@ -20,6 +20,14 @@ void Init()
     *(char *)0xd021 = BLACK;    // screen background
     *(char *)0x286 = YELLOW;
     _screenCharColor = YELLOW;
+
+    // Sprite pointers
+    *(char *)2040 = 192;
+    *(char *)2041 = 194;
+
+    SetSpriteXY(0,100,100);
+    SetSpriteXY(1,150,100);
+    
     Cls();
 }
 
@@ -70,7 +78,13 @@ void MainMenu()
 
 void GameLoop()
 {
+    SpriteOn(0);
+    SpriteOn(1);
 
+    WaitForJoy();
+
+    SpriteOff(0);
+    SpriteOff(1);
 }
 
 void GameOver()
