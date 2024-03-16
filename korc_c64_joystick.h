@@ -4,10 +4,11 @@
 #define _KORC_C64_JOYSTICK_
 
 void JoystickRead();
-/*
-void Joy1Read();
-void Joy2Read();
-*/
+
+
+//void Joy1Read();
+void Joystick2Read();
+
 char Joy1Up();
 char Joy1Down();
 char Joy1Right();

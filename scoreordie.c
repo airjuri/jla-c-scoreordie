@@ -13,6 +13,21 @@ char _exit = 0;
 char _gameName[] = "SCORE OR DIE";
 int _hiScore = 0;
 
+int _enemyX = 511;
+char _enemyY = 229;
+int _spriteX = 160;
+char _spriteY = 229;
+
+char _jumpActive = 0;
+char _jumpStage = 0;
+char _jumpOffset[] = { 0,1,3,5,6,8,9,11,12,13,15,16,17,18,18,19,20,20,20,20,20,20,20,20,19,18,18,17,16,15,13,12,11,9,8,6,5,3,1,0 };
+/*
+const jumpTime: byte = 40;
+jumpOffset: array[jumpTime] of byte = (0,1,3,5,6,8,9,11,12,13,15,16,17,18,18,19,20,20,20,20,20,20,20,20,19,18,18,17,16,15,13,12,11,9,8,6,5,3,1,0);
+
+*/
+
+
 void Init()
 {
  
@@ -25,8 +40,8 @@ void Init()
     *(char *)2040 = 192;
     *(char *)2041 = 194;
 
-    SetSpriteXY(0,100,100);
-    SetSpriteXY(1,150,100);
+    SetSpriteXY(0,100,229);
+    SetSpriteXY(1,150,229);
     
     Cls();
 }
@@ -73,13 +88,79 @@ void MainMenu()
     WaitForJoy();
 }
 
+char _rollStage = 0;
+char _rollSpeed = 0;
+char _spriteIdx = 0;
 
+void AdvanceRoll()
+{
+    if(++_rollSpeed>3){
+        _rollSpeed = 0;
+        if(++_rollStage>3) _rollStage = 0;
+        *(char *)2041 = 194 + _rollStage;
+    }
+}
 
+void Jumpper()
+{
+    if(++_jumpStage>=sizeof(_jumpStage))
+    {
+        _jumpActive = 1;
+        _jumpStage = 0;
+    }
+}
+
+void WaitVBL()
+{
+//        *(char *)0xd020 = LIGHTRED;    // border speed indicator
+        while(((*(char *)(0xd011)) & 0b10000000) != 0b10000000);
+/*
+        *(char *)0xd020 = GREEN;
+
+        *(char *)0xd016 = _xControlRegisterState | xScroll;                  // Set X Scroll
+        *(char *)0xd011 = _yControlRegisterState | yScroll[yScrollIndex++];  // Set X Scroll
+
+        *(char *)0xd020 = DARKGREY;
+
+        if(yScrollIndex >= sizeof(yScroll)) yScrollIndex = 0;
+*/
+        SetSpriteXY(1,_enemyX,_enemyY);
+        
+        while(*(char *)(0xd012) < 248);
+}
 
 void GameLoop()
 {
+    char exit = 0;
+
+    _spriteX = 160;
+    _enemyX = 511;
+
+    Cls();
     SpriteOn(0);
     SpriteOn(1);
+
+    do
+    {
+
+        Joystick2Read();
+        if(_joy2State != 0x0f)
+        {
+            if(Joy2Button() == 0) _jumpActive = 1;
+        }
+
+        if(_jumpActive == 1) Jumpper();
+
+        _enemyX-=2;
+        if(_enemyX<10) _enemyX = 330;
+
+        if(++_jumpStage>39) _jumpStage = 0;
+        SetSpriteXY(0, _spriteX, 229 - _jumpOffset[_jumpStage]);
+        SetSpriteXY(1, _enemyX, 229);
+        AdvanceRoll();
+
+        WaitVBL();
+    }while(!exit);
 
     WaitForJoy();
 

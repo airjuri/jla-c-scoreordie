@@ -9,6 +9,11 @@ void JoystickRead()
     _joy2State = *(char *)0xdc00;
 }
 
+void Joystick2Read()
+{
+    _joy2State = *(char *)0xdc00;
+}
+
 /*
 void Joy1Read()
 {
