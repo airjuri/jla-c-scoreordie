@@ -1,30 +1,16 @@
 // C64 Joystick read functions
 
-char _joy1State = 0xff;
-char _joy2State = 0x0f;
+#include "korc_c64_joystick.h"
 
-void JoystickRead()
+#define JOYSTICK2_ENABLED
+
+#ifdef JOYSTICK1_ENABLED
+char _joy1State = 0xff;
+
+void Joystick1Read()
 {
     _joy1State = *(char *)0xdc01;
-    _joy2State = *(char *)0xdc00;
 }
-
-void Joystick2Read()
-{
-    _joy2State = *(char *)0xdc00;
-}
-
-/*
-void Joy1Read()
-{
-    joy1State = *(char *)0xdc01;
-}
-
-void Joy2Read()
-{
-    joy2State = *(char *)0xdc00;
-}
-*/
 
 char Joy1Up()
 {
@@ -49,6 +35,16 @@ char Joy1Left()
 char Joy1Button()
 {
     return 0x10 & _joy1State;
+}
+#endif
+
+#ifdef JOYSTICK2_ENABLED
+
+char _joy2State = 0x0f;
+
+void Joystick2Read()
+{
+    _joy2State = *(char *)0xdc00;
 }
 
 char Joy2Up()
@@ -75,3 +71,4 @@ char Joy2Button()
 {
     return 0x10 & _joy2State;
 }
+#endif

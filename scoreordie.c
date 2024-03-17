@@ -1,12 +1,14 @@
 #include <stdio.h>
 
+#define JOYSTICK2_ENABLED
+
 #include "c64_gfx.h"
 #include "korc_c64_joystick.h"
+
 
 extern char _screenChar;
 extern char _screenCharColor;
 
-extern char _joy1State;
 extern char _joy2State;
 
 char _exit = 0;
@@ -50,12 +52,12 @@ void WaitForJoy()
 {
     do
     {
-        JoystickRead();
+        Joystick2Read();
         if(_joy2State != 0x0f) {
             if(!(0x10 & _joy2State)) {
                 do
                 {
-                    JoystickRead();
+                    Joystick2Read();
                 } while (!(0x10 & _joy2State));
                 break;
             }; 
@@ -105,18 +107,18 @@ void Jumpper()
 {
     if(++_jumpStage>=sizeof(_jumpStage))
     {
-        _jumpActive = 1;
+        _jumpActive = 0;
         _jumpStage = 0;
     }
 }
 
 void WaitVBL()
 {
-//        *(char *)0xd020 = LIGHTRED;    // border speed indicator
+        *(char *)0xd020 = LIGHTRED;    // border speed indicator
         while(((*(char *)(0xd011)) & 0b10000000) != 0b10000000);
-/*
-        *(char *)0xd020 = GREEN;
 
+        *(char *)0xd020 = GREEN;
+/*
         *(char *)0xd016 = _xControlRegisterState | xScroll;                  // Set X Scroll
         *(char *)0xd011 = _yControlRegisterState | yScroll[yScrollIndex++];  // Set X Scroll
 
@@ -126,7 +128,10 @@ void WaitVBL()
 */
         SetSpriteXY(1,_enemyX,_enemyY);
         
-        while(*(char *)(0xd012) < 248);
+        while(*(char *)(0xd012) < 251);
+
+        *(char *)0xd020 = RED;
+
 }
 
 void GameLoop()
@@ -140,12 +145,27 @@ void GameLoop()
     SpriteOn(0);
     SpriteOn(1);
 
+    _jumpActive = 0;
+
     do
     {
 
         Joystick2Read();
         if(_joy2State != 0x0f)
         {
+            if(Joy2Left() == 0) {
+
+                _spriteX-=2;
+                if(_spriteX<2) _spriteX = 343;
+                *(char *)2040 = 193;
+            }
+            else if(Joy2Right() == 0) {
+
+                _spriteX+=2;
+                if(_spriteX>343) _spriteX = 2;
+                *(char *)2040 = 192;
+            }
+
             if(Joy2Button() == 0) _jumpActive = 1;
         }
 
@@ -154,11 +174,14 @@ void GameLoop()
         _enemyX-=2;
         if(_enemyX<10) _enemyX = 330;
 
-        if(++_jumpStage>39) _jumpStage = 0;
+        //if(++_jumpStage>39) _jumpStage = 0;
+
         SetSpriteXY(0, _spriteX, 229 - _jumpOffset[_jumpStage]);
         SetSpriteXY(1, _enemyX, 229);
+        
         AdvanceRoll();
 
+        _joy2State = 0x0f;
         WaitVBL();
     }while(!exit);
 

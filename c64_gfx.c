@@ -12,7 +12,6 @@ void Cls()
     FillScreenColor();
 }
 
-// TODO these 2 functions to their own source file
 void FillScreen()
 {
     __asm__("ldx #0");
@@ -39,6 +38,7 @@ void FillScreenColor()
     __asm__("bne FillScreenColor_Loop1");
 }
 
+/*
 void Scroll1Left()
 {
     __asm__("clc");
@@ -61,6 +61,7 @@ void Scroll1Left()
     __asm__("dex");
     __asm__("bne LineCopyLoop");
 }
+*/
 
 const char _bitLUT[] = { 1,2,4,8,16,32,64,128 };
 
