@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #define JOYSTICK2_ENABLED
 
@@ -12,13 +13,16 @@ extern char _screenCharColor;
 extern char _joy2State;
 
 char _exit = 0;
+char _exitGame = 0;
 char _gameName[] = "SCORE OR DIE";
-int _hiScore = 0;
+unsigned int _hiScore = 0;
+unsigned int _score = 0;
 
 int _enemyX = 511;
 char _enemyY = 229;
 int _spriteX = 160;
 char _spriteY = 229;
+char _spriteYPos = 229;
 
 char _jumpActive = 0;
 char _jumpStage = 0;
@@ -28,7 +32,6 @@ const jumpTime: byte = 40;
 jumpOffset: array[jumpTime] of byte = (0,1,3,5,6,8,9,11,12,13,15,16,17,18,18,19,20,20,20,20,20,20,20,20,19,18,18,17,16,15,13,12,11,9,8,6,5,3,1,0);
 
 */
-
 
 void Init()
 {
@@ -105,7 +108,7 @@ void AdvanceRoll()
 
 void Jumpper()
 {
-    if(++_jumpStage>=sizeof(_jumpStage))
+    if(++_jumpStage>=sizeof(_jumpOffset))
     {
         _jumpActive = 0;
         _jumpStage = 0;
@@ -134,14 +137,36 @@ void WaitVBL()
 
 }
 
+void ScoreOrDie()
+{
+    if((_spriteX > _enemyX-8)
+     &&(_spriteX < _enemyX+8))
+     {
+        if((_spriteY - _jumpOffset[_jumpStage]) < (229-15)) {
+            _score += 5;
+//            *(char *)0x00d2 = 2;
+//            *(char *)0x00d3 = 8;
+//            itoaScore();
+//            puts(_buffer);
+            printf("%cSCORE: %d", 19, _score); // TODO faster score printout
+
+        }
+        else _exitGame = 1;
+     }
+}
+
 void GameLoop()
 {
-    char exit = 0;
-
     _spriteX = 160;
     _enemyX = 511;
+    _score = 0;
+    _exitGame = 0;
+    _jumpStage = 0;
 
     Cls();
+
+    printf("%cSCORE:", 19);
+
     SpriteOn(0);
     SpriteOn(1);
 
@@ -179,11 +204,13 @@ void GameLoop()
         SetSpriteXY(0, _spriteX, 229 - _jumpOffset[_jumpStage]);
         SetSpriteXY(1, _enemyX, 229);
         
+        ScoreOrDie();
+
         AdvanceRoll();
 
         _joy2State = 0x0f;
         WaitVBL();
-    }while(!exit);
+    }while(!_exitGame);
 
     WaitForJoy();
 
@@ -195,6 +222,22 @@ void GameOver()
 {
     Cls();
     printf("%c\n\n\n\n\n\n\n\n               GAME OVER", 19);
+
+    if(_score >= _hiScore) {
+        _hiScore = _score;
+        printf("\n\n     CONGRATULATIONS FOR HIGH SCORE\n\n");
+        if(_hiScore<63000UL) {
+            printf("          RANK: REGULAR CHAMP");
+        }
+        else {
+            printf("          RANK: C64 CHAMPION 64000!");
+        }
+
+        printf("\n\n       NEW HIGH SCORE: %d", _hiScore);
+    }
+    else {
+        printf("\n\n               SAD TIMES");
+    }
 
     WaitForJoy();
 }
