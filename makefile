@@ -1,6 +1,6 @@
 # make CC65_TARGET=c64
 
-SOURCES = scoreordie.c c64_gfx.c korc_c64_joystick.c
+SOURCES = scoreordie.c c64_gfx.c korc_c64_joystick.c scoreordie_sprites.c
 
 PROGRAM = scoreordie
 
