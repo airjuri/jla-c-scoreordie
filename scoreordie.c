@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
+//#define BORDER_DEBUG
 #define JOYSTICK2_ENABLED
 
 #include "c64_gfx.h"
@@ -18,8 +19,8 @@ char _gameName[] = "SCORE OR DIE";
 unsigned int _hiScore = 0;
 unsigned int _score = 0;
 
-int _enemyX = 511;
-int _spriteX = 160;
+signed int _enemyX = 511;
+signed int _spriteX = 160;
 char _enemyY = 229;
 char _spriteY = 229;
 char _spriteYPos = 229;
@@ -118,24 +119,21 @@ void Jumpper()
 
 void WaitVBL()
 {
-        *(char *)0xd020 = LIGHTRED;    // border speed indicator
-        while(((*(char *)(0xd011)) & 0b10000000) != 0b10000000);
+#ifdef BORDER_DEBUG
+    *(char *)0xd020 = WHITE;    // border speed indicator
+#endif
 
-        *(char *)0xd020 = GREEN;
-/*
-        *(char *)0xd016 = _xControlRegisterState | xScroll;                  // Set X Scroll
-        *(char *)0xd011 = _yControlRegisterState | yScroll[yScrollIndex++];  // Set X Scroll
+    while(((*(char *)(0xd011)) & 0b10000000) != 0b10000000);
 
-        *(char *)0xd020 = DARKGREY;
-
-        if(yScrollIndex >= sizeof(yScroll)) yScrollIndex = 0;
-*/
-        SetSpriteXY(1,_enemyX,_enemyY);
+#ifdef BORDER_DEBUG
+    *(char *)0xd020 = GREEN;
+#endif
         
-        while(*(char *)(0xd012) < 251);
+    while(*(char *)(0xd012) < 251);
 
-        *(char *)0xd020 = RED;
-
+#ifdef BORDER_DEBUG
+    *(char *)0xd020 = RED;
+#endif
 }
 
 void ScoreOrDie()
@@ -198,13 +196,22 @@ void GameLoop()
                     direction = 0;
                 }
             }
-            else
-            {
-                if(direction > 0) _spriteX+=2;
-                else if (direction < 0) _spriteX-=2;
+            else {
+                if(direction > 0) {
+                    _spriteX+=2;
+                    if(_spriteX>343) _spriteX = 2;
+                }
+                else if (direction < 0) {
+                    _spriteX-=2;
+                    if(_spriteX<2) _spriteX = 343;
+                }
             }
 
             if(Joy2Button() == 0) _jumpActive = 1;
+
+#ifdef BORDER_DEBUG
+            if(Joy2Down() == 0) _exit = 1;  // Exit the program compeltely
+#endif
         }
 
         if(_jumpActive == 1) Jumpper();
