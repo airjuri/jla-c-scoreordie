@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <stdlib.h>
+
 //#define BORDER_DEBUG
 #define JOYSTICK2_ENABLED
 
@@ -28,12 +30,13 @@ char _spriteYPos = 229;
 char _jumpActive = 0;
 char _jumpStage = 0;
 char _jumpOffset[] = { 0,1,3,5,6,8,9,11,12,13,15,16,17,18,18,19,20,20,20,20,20,20,20,20,19,18,18,17,16,15,13,12,11,9,8,6,5,3,1,0 };
+char _scoreBuffer[] = "     ";
 
 void Init()
 {
     InitSprites();
 
-    *(char *)0xd020 = RED;      // border
+    *(char *)0xd020 = GREEN;      // border
     *(char *)0xd021 = BLACK;    // screen background
     *(char *)0x286 = YELLOW;
     _screenCharColor = YELLOW;
@@ -41,6 +44,9 @@ void Init()
     // Sprite pointers
     *(char *)2040 = 192;    // Player   (192 * 64 = 12288)
     *(char *)2041 = 194;    // Enemy
+
+    SetSpriteColor(0,YELLOW);
+    SetSpriteColor(1,LIGHTRED);
 
     SetSpriteXY(0,100,229);
     SetSpriteXY(1,150,229);
@@ -104,14 +110,16 @@ void AdvanceRoll()
 }
 
 void PrintScore() {
-    printf("%cSCORE: %d", 19, _score); // TODO faster score printout
+    itoa(_score, _scoreBuffer, 10);
+    *(char *)0x00d6 = -1;
+    *(char *)0x00d3 = 7;
+    puts(_scoreBuffer);
 }
 
 void Jumpper()
 {
     if(++_jumpStage>=sizeof(_jumpOffset))
     {
-        PrintScore();
         _jumpActive = 0;
         _jumpStage = 0;
     }
@@ -120,16 +128,16 @@ void Jumpper()
 void WaitVBL()
 {
 #ifdef BORDER_DEBUG
-    *(char *)0xd020 = WHITE;    // border speed indicator
+    *(char *)0xd020 = GREEN;    // border speed indicator
 #endif
 
     while(((*(char *)(0xd011)) & 0b10000000) != 0b10000000);
 
 #ifdef BORDER_DEBUG
-    *(char *)0xd020 = GREEN;
+    *(char *)0xd020 = LIGHTGREY;
 #endif
         
-    while(*(char *)(0xd012) < 251);
+    while(*(char *)(0xd012) < 50); // 251
 
 #ifdef BORDER_DEBUG
     *(char *)0xd020 = RED;
@@ -143,12 +151,7 @@ void ScoreOrDie()
      {
         if((_spriteY - _jumpOffset[_jumpStage]) < (229-15)) {
             _score += 5;
-//            *(char *)0x00d2 = 2;
-//            *(char *)0x00d3 = 8;
-//            itoaScore();
-//            puts(_buffer);
-            //printf("%cSCORE: %d", 19, _score); // TODO faster score printout
-
+            PrintScore();
         }
         else _exitGame = 1;
      }
@@ -166,6 +169,7 @@ void GameLoop()
 
     Cls();
 
+    printf("%cSCORE:",19);
     PrintScore();
 
     SpriteOn(0);
@@ -210,7 +214,7 @@ void GameLoop()
             if(Joy2Button() == 0) _jumpActive = 1;
 
 #ifdef BORDER_DEBUG
-            if(Joy2Down() == 0) _exit = 1;  // Exit the program compeltely
+            if(Joy2Down() == 0) _exit = 1;  // Exit the program completely
 #endif
         }
 
