@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <conio.h>
 
-#define BORDER_DEBUG
+//#define BORDER_DEBUG
 #define JOYSTICK2_ENABLED
 
 #include "c64_gfx.h"
@@ -102,7 +102,7 @@ void MainMenu()
     printf("  GET 64000 POINTS TO BE C64 CHAMPION!\n\n");
     printf("            HINT: DO NOT DIE\n\n\n\n\n\n\n\n");
     printf("    JOYSTICK 2, PUSH BUTTON TO START\n\n");
-    printf("     HIGHEST SCORE OF SESSION: %i", _hiScore);
+    printf("     HIGHEST SCORE OF SESSION: %u", _hiScore);
 
     WaitForJoy(1);
 }
@@ -122,7 +122,7 @@ void AdvanceRoll()
 
 void PrintScore()
 {
-    itoa(_score, _scoreBuffer, 10);
+    ltoa(_score, _scoreBuffer, 10);
     *(char *)0x00d6 = -1;
     *(char *)0x00d3 = 7;
     puts(_scoreBuffer);    
@@ -167,6 +167,8 @@ void ScoreOrDie()
         }
         else _exitGame = 1;
      }
+
+     if(_score>=64000UL) _exitGame = 1;
 }
 
 void GameLoop()
@@ -267,7 +269,7 @@ void GameOver()
             printf("          RANK: C64 CHAMPION 64000!");
         }
 
-        printf("\n\n       NEW HIGH SCORE: %d", _hiScore);
+        printf("\n\n       NEW HIGH SCORE: %u", _hiScore);
     }
     else {
         printf("\n\n               SAD TIMES");
