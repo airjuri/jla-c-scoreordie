@@ -2,8 +2,9 @@
 #include <string.h>
 
 #include <stdlib.h>
+#include <conio.h>
 
-//#define BORDER_DEBUG
+#define BORDER_DEBUG
 #define JOYSTICK2_ENABLED
 
 #include "c64_gfx.h"
@@ -54,7 +55,7 @@ void Init()
     Cls();
 }
 
-void WaitForJoy()
+void WaitForJoy(char keyboard)
 {
     do
     {
@@ -69,6 +70,13 @@ void WaitForJoy()
             }; 
         }
 
+        if(keyboard && kbhit()) {
+            cgetc();
+            _exitGame = 1;
+            _exit = 1;
+            break;
+        }
+
     }while(1);
 }
 
@@ -77,11 +85,14 @@ void IntroScreen()
     Cls();
     printf("%c\n\n\n",19);
     //      0123456789012345678901234567890123456789
-    printf("        HALF OF AMFF AKA AIRJURI\n\n");
-    printf("                PRESENTS\n\n\n\n");
-    printf("              %s", _gameName);
+    *(char *)0x00d3 = 8;
+    puts("HALF OF AMFF AKA AIRJURI\n\n");
+    *(char *)0x00d3 = 16;
+    puts("PRESENTS\n\n\n\n");
+    *(char *)0x00d3 = 14;
+    puts(_gameName);
 
-    WaitForJoy();
+    WaitForJoy(0);
 }
 
 void MainMenu()
@@ -93,7 +104,7 @@ void MainMenu()
     printf("    JOYSTICK 2, PUSH BUTTON TO START\n\n");
     printf("     HIGHEST SCORE OF SESSION: %i", _hiScore);
 
-    WaitForJoy();
+    WaitForJoy(1);
 }
 
 char _rollStage = 0;
@@ -109,11 +120,12 @@ void AdvanceRoll()
     }
 }
 
-void PrintScore() {
+void PrintScore()
+{
     itoa(_score, _scoreBuffer, 10);
     *(char *)0x00d6 = -1;
     *(char *)0x00d3 = 7;
-    puts(_scoreBuffer);
+    puts(_scoreBuffer);    
 }
 
 void Jumpper()
@@ -166,6 +178,7 @@ void GameLoop()
     _score = 0;
     _exitGame = 0;
     _jumpStage = 0;
+    _jumpActive = 0;
 
     Cls();
 
@@ -174,8 +187,6 @@ void GameLoop()
 
     SpriteOn(0);
     SpriteOn(1);
-
-    _jumpActive = 0;
 
     do
     {
@@ -235,7 +246,7 @@ void GameLoop()
 
     PrintScore();
 
-    WaitForJoy();
+    WaitForJoy(0);
 
     SpriteOff(0);
     SpriteOff(1);
@@ -262,7 +273,7 @@ void GameOver()
         printf("\n\n               SAD TIMES");
     }
 
-    WaitForJoy();
+    WaitForJoy(0);
 }
 
 int main()
@@ -272,7 +283,7 @@ int main()
 
     _exit = 0;
     do{
-        MainMenu();
+        MainMenu(); if(_exit) break;
         GameLoop();
         GameOver();
     }while(!_exit);
