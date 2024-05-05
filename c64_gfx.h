@@ -23,11 +23,12 @@ void FillScreenColor();
 void Scroll1Left();
 void Cls();
 
-void SpriteOn(char sprite);
-void SpriteOff(char sprite);
-void SetSpriteBehindGfx(char sprite);
-void SetSpriteFrontGfx(char sprite);
-void SetSpriteColor(char sprite, char color);
+#define SPRITE_ON(sprite_no) (*(char *)0xd015 |= _bitLUT[sprite_no])
+#define SPRITE_OFF(sprite_no) (*(char *)0xd015 &= ~_bitLUT[sprite_no])
+#define SPRITE_BEHIND_GFX(sprite_no) (*(char *)0xd01b |= _bitLUT[sprite_no])
+#define SPRITE_FRONT_GFX(sprite_no) (*(char *)0xd01b &= ~_bitLUT[sprite_no])
+#define SPRITE_COLOR(sprite_no,color) (_spriteColor[sprite_no] = color)
+
 // Sets position of sprite. Sprite number maximum is 7
 // DO NOT go out of limits on that one!
 // X- and Y-coordinates are "safe"

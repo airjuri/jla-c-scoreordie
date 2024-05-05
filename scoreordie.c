@@ -13,8 +13,9 @@
 
 extern char _screenChar;
 extern char _screenCharColor;
-
 extern char _joy2State;
+extern char *_spriteColor;
+extern const char _bitLUT[];
 
 char _exit = 0;
 char _exitGame = 0;
@@ -46,8 +47,8 @@ void Init()
     *(char *)2040 = 192;    // Player   (192 * 64 = 12288)
     *(char *)2041 = 194;    // Enemy
 
-    SetSpriteColor(0,YELLOW);
-    SetSpriteColor(1,LIGHTRED);
+    SPRITE_COLOR(0,YELLOW);
+    SPRITE_COLOR(1,LIGHTRED);
 
     SetSpriteXY(0,100,229);
     SetSpriteXY(1,150,229);
@@ -187,8 +188,8 @@ void GameLoop()
     printf("%cSCORE:",19);
     PrintScore();
 
-    SpriteOn(0);
-    SpriteOn(1);
+    SPRITE_ON(0); // SpriteOn(0);
+    SPRITE_ON(1); //SpriteOn(1);
 
     do
     {
@@ -250,8 +251,8 @@ void GameLoop()
 
     WaitForJoy(0);
 
-    SpriteOff(0);
-    SpriteOff(1);
+    SPRITE_OFF(0);
+    SPRITE_OFF(1);
 }
 
 void GameOver()

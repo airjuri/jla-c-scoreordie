@@ -134,9 +134,9 @@ char _spriteData[] = {
     0b00000000,
 };
 
-
 void InitSprites()
 {
+    // TODO Assembly version to save some bytes
     int i,j = 0;
     // init sprites data
     for(i=12288;i<12288+sizeof(_spriteData);++i) {

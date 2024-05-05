@@ -1,5 +1,7 @@
 #include "c64_gfx.h"
 
+const char _bitLUT[] = { 1,2,4,8,16,32,64,128 };
+
 char _screenChar;
 char _screenCharColor;
 
@@ -38,60 +40,6 @@ void FillScreenColor()
     __asm__("bne FillScreenColor_Loop1");
 }
 
-/*
-void Scroll1Left()
-{
-    __asm__("clc");
-    __asm__("ldx #4");
-    __asm__("ldy #0");
-    __asm__("LineCopyLoop:");
-    __asm__("lda $0429,y"); __asm__("sta $0428,y");
-    __asm__("lda $042a,y"); __asm__("sta $0429,y");
-    __asm__("lda $042b,y"); __asm__("sta $042a,y");
-    __asm__("lda $042c,y"); __asm__("sta $042b,y");
-    __asm__("lda $042d,y"); __asm__("sta $042c,y");
-    __asm__("lda $042e,y"); __asm__("sta $042d,y");
-    __asm__("lda $042f,y"); __asm__("sta $042e,y");
-    __asm__("lda $0430,y"); __asm__("sta $042f,y");
-    __asm__("lda $0431,y"); __asm__("sta $0430,y");
-    __asm__("lda $0432,y"); __asm__("sta $0431,y");
-    __asm__("tya");
-    __asm__("adc #10");
-    __asm__("tay");
-    __asm__("dex");
-    __asm__("bne LineCopyLoop");
-}
-*/
-
-const char _bitLUT[] = { 1,2,4,8,16,32,64,128 };
-
-// Sprite stuff
-void SpriteOn(char sprite)
-{
-    *(char *)0xd015 |= _bitLUT[sprite];
-}
-
-void SpriteOff(char sprite)
-{
-    *(char *)0xd015 &= ~_bitLUT[sprite];
-}
-
-void SetSpriteBehindGfx(char sprite)
-{
-    *(char *)0xd01b |= _bitLUT[sprite];
-}
-
-void SetSpriteFrontGfx(char sprite)
-{
-    *(char *)0xd01b &= ~_bitLUT[sprite];
-}
-
-
-void SetSpriteColor(char sprite, char color)
-{
-    _spriteColor[sprite] = color;
-}
-
 // Sets position of sprite. Sprite number maximum is 7
 // DO NOT go out of limits on that one!
 // X- and Y-coordinates are "safe"
@@ -101,6 +49,7 @@ void SetSpriteXY(char sprite, int xPosition, char yPosition)
     *(char *)(0xd000 + spriteOffset) = (char)xPosition;
     *(char *)(0xd001 + spriteOffset) = yPosition;
 
-    if(xPosition<256) *(char *)0xd010 &= ~_bitLUT[sprite];
-    else  *(char *)0xd010 |= _bitLUT[sprite];
+    *(char *)0xd010 = xPosition < 256
+                    ? *(char *)0xd010 & ~_bitLUT[sprite]
+                    : *(char *)0xd010 | _bitLUT[sprite];
 }
