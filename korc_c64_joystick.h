@@ -3,22 +3,20 @@
 #ifndef _KORC_C64_JOYSTICK_
 #define _KORC_C64_JOYSTICK_
 
-#ifdef JOYSTICK2_ENABLED
-void Joystick2Read();
-char Joy2Up();
-char Joy2Down();
-char Joy2Right();
-char Joy2Left();
-char Joy2Button();
-#endif
+#define JOY2_UP (!(0x01 & _joy2State))
+#define JOY2_DOWN (!(0x02 & _joy2State))
+#define JOY2_RIGHT (!(0x08 & _joy2State))
+#define JOY2_LEFT (!(0x04 & _joy2State))
+#define JOY2_BUTTON (!(0x10 & _joy2State))
 
-#ifdef JOYSTICK1_ENABLED
-void Joystick1Read();
-char Joy1Up();
-char Joy1Down();
-char Joy1Right();
-char Joy1Left();
-char Joy1Button();
+#define JOY1_UP (!(0x01 & _joy1State))
+#define JOY1_DOWN (!(0x02 & _joy1State))
+#define JOY1_RIGHT (!(0x08 & _joy1State))
+#define JOY1_LEFT (!(0x04 & _joy1State))
+#define JOY1_BUTTON (!(0x10 & _joy1State))
+
+#ifdef JOY2_ENABLED
+void Joystick2Read();
 #endif
 
 #endif

@@ -5,7 +5,7 @@
 #include <conio.h>
 
 //#define BORDER_DEBUG
-#define JOYSTICK2_ENABLED
+#define JOY2_ENABLED
 
 #include "c64_gfx.h"
 #include "korc_c64_joystick.h"
@@ -61,11 +61,11 @@ void WaitForJoy(char keyboard)
     {
         Joystick2Read();
         if(_joy2State != 0x0f) {
-            if(!(0x10 & _joy2State)) {
+            if(JOY2_BUTTON) {
                 do
                 {
                     Joystick2Read();
-                } while (!(0x10 & _joy2State));
+                } while (JOY2_BUTTON);
                 break;
             }; 
         }
@@ -197,13 +197,13 @@ void GameLoop()
         if(_joy2State != 0x0f)
         {
             if(!_jumpActive) {
-                if(Joy2Left() == 0) {
+                if(JOY2_LEFT) {
                     direction = -1;
                     _spriteX-=2;
                     if(_spriteX<2) _spriteX = 343;
                     *(char *)2040 = 193;
                 }
-                else if(Joy2Right() == 0) {
+                else if(JOY2_RIGHT) {
                     direction = 1;
                     _spriteX+=2;
                     if(_spriteX>343) _spriteX = 2;
@@ -224,7 +224,7 @@ void GameLoop()
                 }
             }
 
-            if(Joy2Button() == 0) _jumpActive = 1;
+            if(JOY2_BUTTON) _jumpActive = 1;
 
 #ifdef BORDER_DEBUG
             if(Joy2Down() == 0) _exit = 1;  // Exit the program completely
