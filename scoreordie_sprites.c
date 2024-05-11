@@ -140,7 +140,7 @@ void InitSprites()
     int i,j = 0;
     // init sprites data
     for(i=12288;i<12288+sizeof(_spriteData);++i) {
-        *(char *)(1024 + j) = _spriteData[j];
+        *(char *)(1024 + j) = _spriteData[j]; // Startup candy...
         *(char *)i = _spriteData[j++];
     }
 }

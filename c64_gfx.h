@@ -34,4 +34,6 @@ void Cls();
 // X- and Y-coordinates are "safe"
 void SetSpriteXY(char sprite, int xPosition, char yPosition);
 
+void PrintX(char x, const char *text);
+
 #endif

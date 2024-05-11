@@ -11,8 +11,8 @@
 #include "korc_c64_joystick.h"
 #include "scoreordie_sprites.h"
 
-extern char _screenChar;
-extern char _screenCharColor;
+//extern char _screenChar;
+//extern char _screenCharColor;
 extern char _joy2State;
 extern char *_spriteColor;
 extern const char _bitLUT[];
@@ -29,10 +29,13 @@ char _enemyY = 229;
 char _spriteY = 229;
 char _spriteYPos = 229;
 
+char _rollStage = 0;
+char _rollSpeed = 0;
+
 char _jumpActive = 0;
 char _jumpStage = 0;
 char _jumpOffset[] = { 0,1,3,5,6,8,9,11,12,13,15,16,17,18,18,19,20,20,20,20,20,20,20,20,19,18,18,17,16,15,13,12,11,9,8,6,5,3,1,0 };
-char _scoreBuffer[] = "     ";
+char _printBuffer[6];
 
 void Init()
 {
@@ -40,20 +43,15 @@ void Init()
 
     *(char *)0xd020 = GREEN;      // border
     *(char *)0xd021 = BLACK;    // screen background
-    *(char *)0x286 = YELLOW;
-    _screenCharColor = YELLOW;
-
-    // Sprite pointers
-    *(char *)2040 = 192;    // Player   (192 * 64 = 12288)
-    *(char *)2041 = 194;    // Enemy
+    *(char *)0x286 = YELLOW;    // text 
+    *(char *)2040 = 192;    // Player   (192 * 64 = 12288, of course 193 also)
+    *(char *)2041 = 194;    // Enemy    (194 - 197)
 
     SPRITE_COLOR(0,YELLOW);
     SPRITE_COLOR(1,LIGHTRED);
 
     SetSpriteXY(0,100,229);
     SetSpriteXY(1,150,229);
-    
-    Cls();
 }
 
 void WaitForJoy(char keyboard)
@@ -84,14 +82,10 @@ void WaitForJoy(char keyboard)
 void IntroScreen()
 {
     Cls();
-    printf("%c\n\n\n",19);
-    //      0123456789012345678901234567890123456789
-    *(char *)0x00d3 = 8;
-    puts("HALF OF AMFF AKA AIRJURI\n\n");
-    *(char *)0x00d3 = 16;
-    puts("PRESENTS\n\n\n\n");
-    *(char *)0x00d3 = 14;
-    puts(_gameName);
+    printf("%c\n\n\n\n\n", 19);
+    PrintX(8, "HALF OF AMFF AKA AIRJURI\n\n");
+    PrintX(16, "PRESENTS\n\n");
+    PrintX(14, _gameName);
 
     WaitForJoy(0);
 }
@@ -99,18 +93,20 @@ void IntroScreen()
 void MainMenu()
 {
     Cls();
-    printf("%c\n\n\n\n\n              %s\n\n\n\n",19, _gameName);
-    printf("  GET 64000 POINTS TO BE C64 CHAMPION!\n\n");
-    printf("            HINT: DO NOT DIE\n\n\n\n\n\n\n\n");
-    printf("    JOYSTICK 2, PUSH BUTTON TO START\n\n");
-    printf("     HIGHEST SCORE OF SESSION: %u", _hiScore);
+    printf("%c\n\n\n\n\n",19);
+    PrintX(14, _gameName);
+    printf("\n\n\n");
+    PrintX(2, "GET 64000 POINTS TO BE C64 CHAMPION!\n\n");
+    PrintX(12, "HINT: DO NOT DIE\n\n\n\n\n\n");
+    PrintX(4, "JOYSTICK 2, PUSH BUTTON TO START\n\n");
+    PrintX(5, ("HIGHEST SCORE OF SESSION: "));
+
+    ltoa(_hiScore, _printBuffer, 10);
+    printf("%c", (char)145);    // Up
+    PrintX(31, _printBuffer);    
 
     WaitForJoy(1);
 }
-
-char _rollStage = 0;
-char _rollSpeed = 0;
-char _spriteIdx = 0;
 
 void AdvanceRoll()
 {
@@ -123,10 +119,9 @@ void AdvanceRoll()
 
 void PrintScore()
 {
-    ltoa(_score, _scoreBuffer, 10);
-    *(char *)0x00d6 = -1;
-    *(char *)0x00d3 = 7;
-    puts(_scoreBuffer);    
+    ltoa(_score, _printBuffer, 10);
+    *(char *)0x00d6 = - 1;
+    PrintX(7, _printBuffer);
 }
 
 void Jumpper()
@@ -184,7 +179,6 @@ void GameLoop()
     _jumpActive = 0;
 
     Cls();
-
     printf("%cSCORE:",19);
     PrintScore();
 
@@ -193,7 +187,6 @@ void GameLoop()
 
     do
     {
-
         Joystick2Read();
         if(_joy2State != 0x0f)
         {
@@ -225,11 +218,7 @@ void GameLoop()
                 }
             }
 
-            if(JOY2_BUTTON) _jumpActive = 1;
-
-#ifdef BORDER_DEBUG
-            if(Joy2Down() == 0) _exit = 1;  // Exit the program completely
-#endif
+            if(JOY2_BUTTON || JOY2_UP) _jumpActive = 1;
         }
 
         if(_jumpActive == 1) Jumpper();
@@ -258,22 +247,23 @@ void GameLoop()
 void GameOver()
 {
     Cls();
-    printf("%c\n\n\n\n\n\n\n\n               GAME OVER", 19);
+    printf("%c\n\n\n\n\n\n\n\n", 19);
+    PrintX(15, "GAME OVER\n\n");
 
     if(_score >= _hiScore) {
         _hiScore = _score;
-        printf("\n\n     CONGRATULATIONS FOR HIGH SCORE\n\n");
+        PrintX(4, "CONGRATULATIONS FOR HIGH SCORE\n\n");
         if(_hiScore<63000UL) {
-            printf("          RANK: REGULAR CHAMP");
+            PrintX(10, "RANK: REGULAR CHAMP");
         }
         else {
-            printf("          RANK: C64 CHAMPION 64000!");
+            PrintX(10,"RANK: C64 CHAMPION 64000!");
         }
 
-        printf("\n\n       NEW HIGH SCORE: %u", _hiScore);
+        printf("\n\n        NEW HIGH SCORE: %u", _hiScore);
     }
     else {
-        printf("\n\n               SAD TIMES");
+        PrintX(15, (14,14,"SAD TIMES"));
     }
 
     WaitForJoy(0);

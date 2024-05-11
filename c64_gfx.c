@@ -1,19 +1,25 @@
+#include <stdio.h>
+
 #include "c64_gfx.h"
 
 const char _bitLUT[] = { 1,2,4,8,16,32,64,128 };
 
-char _screenChar;
-char _screenCharColor;
+//char _screenChar;
+//char _screenCharColor;
 
 char *_spriteColor = (char *)0xd027;
 
 void Cls()
 {
+    /*
     _screenChar = ' '; 
     FillScreen();
     FillScreenColor();
+    */
+   printf("%c", 147);
 }
 
+/*
 void FillScreen()
 {
     __asm__("ldx #0");
@@ -39,7 +45,7 @@ void FillScreenColor()
     __asm__("dex");
     __asm__("bne FillScreenColor_Loop1");
 }
-
+*/
 // Sets position of sprite. Sprite number maximum is 7
 // DO NOT go out of limits on that one!
 // X- and Y-coordinates are "safe"
@@ -52,4 +58,10 @@ void SetSpriteXY(char sprite, int xPosition, char yPosition)
     *(char *)0xd010 = xPosition < 256
                     ? *(char *)0xd010 & ~_bitLUT[sprite]
                     : *(char *)0xd010 | _bitLUT[sprite];
+}
+
+void PrintX(char x, const char *text)
+{
+    *(char *)0x00d3 = x;
+    puts(text);    
 }
