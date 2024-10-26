@@ -15,8 +15,7 @@
 #define JOY1_LEFT (!(0x04 & _joy1State))
 #define JOY1_BUTTON (!(0x10 & _joy1State))
 
-#ifdef JOY2_ENABLED
 void Joystick2Read();
-#endif
+void Joystick1Read();
 
 #endif

@@ -35,10 +35,12 @@ char _rollSpeed = 0;
 char _jumpActive = 0;
 char _jumpStage = 0;
 char _jumpOffset[] = { 0,1,3,5,6,8,9,11,12,13,15,16,17,18,18,19,20,20,20,20,20,20,20,20,19,18,18,17,16,15,13,12,11,9,8,6,5,3,1,0 };
-char _printBuffer[6];
+char _upPrtBuffer[7];
+char *_printBuffer = &_upPrtBuffer[1];
 
 void Init()
 {
+    _upPrtBuffer[0] = 145;
     InitSprites();
 
     *(char *)0xd020 = GREEN;      // border
@@ -102,10 +104,34 @@ void MainMenu()
     PrintX(5, ("HIGHEST SCORE OF SESSION: "));
 
     ltoa(_hiScore, _printBuffer, 10);
-    printf("%c", (char)145);    // Up
-    PrintX(31, _printBuffer);    
+    PrintX(31, _upPrtBuffer);    
 
     WaitForJoy(1);
+}
+
+void GameOver()
+{
+    Cls();
+    printf("%c\n\n\n\n\n\n\n\n", 19);
+    PrintX(15, "GAME OVER\n\n");
+
+    if(_score >= _hiScore) {
+        _hiScore = _score;
+        PrintX(4, "CONGRATULATIONS FOR HIGH SCORE\n\n");
+        if(_hiScore<63000UL) {
+            PrintX(10, "RANK: REGULAR CHAMP");
+        }
+        else {
+            PrintX(10,"RANK: C64 CHAMPION 64000!");
+        }
+
+        printf("\n\n        NEW HIGH SCORE: %d", _hiScore);
+    }
+    else {
+        PrintX(15, (14,14,"SAD TIMES"));
+    }
+
+    WaitForJoy(0);
 }
 
 void AdvanceRoll()
@@ -242,31 +268,6 @@ void GameLoop()
 
     SPRITE_OFF(0);
     SPRITE_OFF(1);
-}
-
-void GameOver()
-{
-    Cls();
-    printf("%c\n\n\n\n\n\n\n\n", 19);
-    PrintX(15, "GAME OVER\n\n");
-
-    if(_score >= _hiScore) {
-        _hiScore = _score;
-        PrintX(4, "CONGRATULATIONS FOR HIGH SCORE\n\n");
-        if(_hiScore<63000UL) {
-            PrintX(10, "RANK: REGULAR CHAMP");
-        }
-        else {
-            PrintX(10,"RANK: C64 CHAMPION 64000!");
-        }
-
-        printf("\n\n        NEW HIGH SCORE: %u", _hiScore);
-    }
-    else {
-        PrintX(15, (14,14,"SAD TIMES"));
-    }
-
-    WaitForJoy(0);
 }
 
 int main()
