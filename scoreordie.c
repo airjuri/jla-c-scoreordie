@@ -219,31 +219,26 @@ void GameLoop()
             if(!_jumpActive) {
                 if(JOY2_LEFT) {
                     direction = -1;
-                    _spriteX-=2;
-                    if(_spriteX<2) _spriteX = 343;
                     *(char *)2040 = 193;
                 }
                 else if(JOY2_RIGHT) {
                     direction = 1;
-                    _spriteX+=2;
-                    if(_spriteX>343) _spriteX = 2;
                     *(char *)2040 = 192;
                 }
                 else {
                     direction = 0;
                 }
             }
-            else {
-                if(direction > 0) {
-                    _spriteX+=2;
-                    if(_spriteX>343) _spriteX = 2;
-                }
-                else if (direction < 0) {
-                    _spriteX-=2;
-                    if(_spriteX<2) _spriteX = 343;
-                }
-            }
 
+            if(direction > 0) {
+                _spriteX+=2;
+                if(_spriteX>343) _spriteX = 2;
+            }
+            else if (direction < 0) {
+                _spriteX-=2;
+                if(_spriteX<2) _spriteX = 343;
+            }
+        
             if(JOY2_BUTTON || JOY2_UP) _jumpActive = 1;
         }
 
